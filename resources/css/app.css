@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.card-img-top {
+    object-fit: cover; /* Hace que la imagen se recorte sin distorsionarse */
+    height: 200px; /* Establecemos una altura fija para las imágenes */
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-body {
+    flex-grow: 1; /* Esto hace que el contenido de la tarjeta ocupe todo el espacio disponible */
+}
