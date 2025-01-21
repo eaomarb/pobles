@@ -9,13 +9,12 @@ use App\Models\Provincia;
 
 class MunicipiController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $perPage = $request->get('perPage', 10); // Default to 10 items per page
-        $municipis = Municipi::paginate($perPage);
-
-        return view('municipis.index', compact('municipis'));
+        $municipis = Municipi::all();  // o la consulta adecuada
+        return view('provincies', compact('municipis'));
     }
+
 
 
     public function provincies()
@@ -27,21 +26,27 @@ class MunicipiController extends Controller
         return view('provincies', compact('provincies'));
     }
 
-
-    public function municipisPerProvincia($provincia)
+    public function municipisPerProvincia(Request $request, $provincia)
     {
-        // Obtener el número de elementos por página desde el request
-        $itemsPerPage = request()->input('itemsPerPage', 10); // 10 es el valor por defecto
+        $itemsPerPage = $request->get('itemsPerPage', 10); // Valor predeterminado: 10
 
-        // Obtener los municipios de la provincia seleccionada
-        $municipis = Municipi::where('provincia', $provincia)
-            ->paginate($itemsPerPage);
+        if ($itemsPerPage === 'all') {
+            $municipis = Municipi::where('provincia', $provincia)->get(); // Obtenemos todos
+        } else {
+            $municipis = Municipi::where('provincia', $provincia)->paginate((int) $itemsPerPage); // Paginación
+        }
 
         return view('municipis.index', compact('municipis', 'provincia'));
     }
 
+    public function indexApi()
+    {
+        // Obtener todos los municipios con solo las columnas que quieres
+        $municipis = Municipi::select('id', 'nom', 'descripcio', 'imatge', 'provincia', 'comarca')->get();
 
-
+        // Devolver los resultados como JSON
+        return response()->json($municipis);
+    }
 
     public function show($id)
     {
@@ -83,44 +88,45 @@ class MunicipiController extends Controller
         // Encontramos el municipio por su ID
         $municipi = Municipi::findOrFail($id);
 
+        // Validación de los campos
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'descripcio' => 'nullable|string',
+            'comarca' => 'nullable|string|max:255',
+            'provincia' => 'required|string|in:Girona,Barcelona,Tarragona,Lleida',
+            'imatge' => 'nullable|image|mimes:jpeg,png,gif|max:99999',
+        ]);
+
         // Verificamos si se ha subido una nueva imagen
         if ($request->hasFile('imatge')) {
-            // Depuración: Verificamos si el archivo se ha subido correctamente
-            //dd($request->file('imatge')); // Muestra los detalles del archivo subido
-
-            if ($request->file('imatge')->isValid()) {
-                // Nombre del archivo de la imagen (manteniendo el nombre original del municipio)
-                $mimeType = $request->imatge->getMimeType();
-                $extensions = [
-                    'image/jpeg' => 'jpg',
-                    'image/png' => 'png',
-                    'image/gif' => 'gif',
-                ];
-                $imageExtension = $extensions[$mimeType] ?? 'jpg'; // 'jpg' como valor por defecto
-                $imageName = $municipi->nom . '.' . $imageExtension;
-
-                // Establecemos la carpeta de destino
-                $directory = public_path('images/' . $request->input('provincia'));
-
-                // Depuración: Verificamos la ruta del directorio
-                //dd($directory); // Muestra la ruta completa del directorio
-
-                // Verificamos si la carpeta existe, y si no, la creamos
-                if (!file_exists($directory)) {
-                    mkdir($directory, 0775, true);  // 0775 es el permiso para crear la carpeta
-                }
-
-                // Movemos la imagen a la carpeta
-                $request->file('imatge')->move($directory, $imageName);
-
-                // Guardamos la ruta de la imagen en la base de datos
-                $municipi->imatge = 'images/' . $request->input('provincia') . '/' . $imageName;
-
-                // Depuración: Verificamos si la ruta se ha guardado correctamente
-                //dd($municipi->imatge); // Muestra la ruta de la imagen guardada
-            } else {
-                return back()->with('error', 'El archivo no es válido');
+            // Eliminar la imagen anterior si existe
+            if (file_exists(public_path($municipi->imatge))) {
+                unlink(public_path($municipi->imatge)); // Elimina el archivo antiguo
             }
+
+            // Nombre del archivo de la imagen
+            $mimeType = $request->imatge->getMimeType();
+            $extensions = [
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/gif' => 'gif',
+            ];
+            $imageExtension = $extensions[$mimeType] ?? 'jpg';
+            $imageName = $municipi->nom . '.' . $imageExtension;
+
+            // Normalizamos la provincia a minúsculas para evitar crear carpetas con inicial en mayúscula
+            $directory = public_path('images/' . strtolower($request->input('provincia')));
+
+            // Verificamos si la carpeta existe, y si no, la creamos
+            if (!file_exists($directory)) {
+                mkdir($directory, 0775, true);
+            }
+
+            // Movemos la imagen a la carpeta
+            $request->file('imatge')->move($directory, $imageName);
+
+            // Guardamos la ruta de la imagen en la base de datos
+            $municipi->imatge = 'images/' . strtolower($request->input('provincia')) . '/' . $imageName;
         }
 
         // Actualizamos los demás campos
@@ -130,7 +136,7 @@ class MunicipiController extends Controller
         $municipi->provincia = $request->input('provincia');
         $municipi->save();
 
-        // Redirigimos de nuevo con un mensaje de éxito
-        return redirect()->route('municipis.index')->with('success', 'Pueblo actualizado correctamente');
+        // Redirigimos con un mensaje de éxito
+        return redirect()->route('municipis.provincies')->with('success', 'Municipi actualitzat correctament');
     }
 }

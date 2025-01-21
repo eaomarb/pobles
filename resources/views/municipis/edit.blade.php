@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="mb-3">
-        <a href="{{ route('municipis.index') }}" class="btn btn-secondary">Darrere</a>
+        <a href="{{ route('municipis.provincies') }}" class="btn btn-secondary">Darrere</a>
     </div>
 
     <div class="w-full">
@@ -12,8 +12,7 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route('municipis.update', $municipi->id) }}" enctype="multipart/form-data">
-        @csrf
+    <form method="POST" action="{{ route('municipis.update', $municipi->id) }}" enctype="multipart/form-data"> @csrf
         @method('PUT')
 
         <div class="mb-3">
@@ -48,10 +47,8 @@
                 <option value="Tarragona" {{ old('provincia', $municipi->provincia) == 'Tarragona' ? 'selected' : '' }}>Tarragona</option>
                 <option value="Lleida" {{ old('provincia', $municipi->provincia) == 'Lleida' ? 'selected' : '' }}>Lleida</option>
             </select>
-            @error('provincia')
-            <div class="fs-6 text-danger">{{ $message }}</div>
-            @enderror
         </div>
+
 
         <div class="mb-3">
             <label for="imatge" class="form-label">{{ __("Imatge") }}</label>
