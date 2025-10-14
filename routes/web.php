@@ -13,7 +13,6 @@ Route::put('/municipis/{municipi}', [MunicipiController::class, 'update'])->name
 Route::get('/municipis', [MunicipiController::class, 'index'])->name('municipis.index');
 Route::get('/municipis/provincia/{provincia}', [MunicipiController::class, 'municipisPerProvincia'])->name('municipis.provincia');
 Route::get('/municipi/{id}', [MunicipiController::class, 'show'])->name('municipis.showById');
-// Rutas para los municipios
 Route::resource('municipis', MunicipiController::class);
 
 Route::get('municipis/{id}', [MunicipiController::class, 'show'])->name('municipis.show');

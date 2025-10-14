@@ -4,7 +4,6 @@
 <div class="container">
     <h1 class="text-center">{{ __('Municipis de la província: ') }} {{ $provincia ?? 'Desconeguda' }}</h1>
 
-    <!-- Filtro para cambiar el número de elementos por página -->
     <div class="mb-3">
         <form method="GET" action="{{ route('municipis.provincia', $provincia) }}">
             <input type="hidden" name="provincia" value="{{ $provincia }}">
@@ -29,10 +28,8 @@
                     <h5 class="card-title">{{ $municipi->nom }}</h5>
                     <p class="card-text">{{ $municipi->descripcio }}</p>
 
-                    <!-- Botón de Mostrar -->
                     <a href="{{ route('municipis.show', $municipi->id) }}" class="btn btn-info">Ver</a>
 
-                    <!-- Botón de Editar (solo si el usuario está logueado) -->
                     @auth
                     <a href="{{ route('municipis.edit', $municipi->id) }}" class="btn btn-primary">Editar</a>
                     @endauth
@@ -42,7 +39,6 @@
         @endforeach
     </div>
 
-    <!-- Enlaces de paginación -->
     <div class="d-flex justify-content-center">
         @if ($municipis instanceof \Illuminate\Pagination\AbstractPaginator)
             {{ $municipis->links() }}

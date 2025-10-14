@@ -12,7 +12,6 @@
         </div>
     </div>
 
-    <!-- Aquí se muestra la información del municipio -->
     <div class="mb-3">
         <strong>{{ __("Nom:") }}</strong>
         <p>{{ $municipi->nom }}</p>
@@ -44,7 +43,6 @@
         @endif
     </div>
 
-    <!-- Botón de editar si el usuario está logueado -->
     @auth
     <div class="mt-3">
         <a href="{{ route('municipis.edit', $municipi->id) }}" class="btn btn-primary">Editar</a>

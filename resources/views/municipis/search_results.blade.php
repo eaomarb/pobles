@@ -17,7 +17,6 @@
             @endforeach
         </ul>
 
-        <!-- Paginación -->
         {{ $municipis->links() }}
     @endif
 
